@@ -1,0 +1,66 @@
+#
+#$program = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher | #Exclude-Programs -ExcludeList $exclude_programs
+#
+#Add-Member -Name 'ComputerName' ` -Value $compname ` -MemberType NoteProperty | 
+#
+#Export-Csv -Path 'C:\programs.csv' -NoTypeInformation -Encoding UTF8
+#
+#
+
+
+
+
+function Exclude-Programs {
+        [cmdletbinding()]
+    Param (
+        [parameter(ValueFromPipeline=$True)]
+        # Параметр, который будет приниматься через конвейер - массив с программами
+        [PSCustomObject]
+        $Programs,
+        [Array]
+        # Список с исключениями
+        $ExcludeList
+    )
+    process {
+        # Счетчик, который меняется если найдена программа из исключений
+        $is_exluded = 0
+
+        # Новый список программ
+        $new_programs_array = @()
+
+        # Два цикла, которые проходят по списку исключений и программ
+        foreach ($program in $Programs){
+            foreach ($e_program in $ExcludeList){
+                # Условие, которая меняет цифру счетчика если программа исключена
+                if ($program.DisplayName -like $e_program){
+                    $is_exluded += 1
+                }
+            }
+
+            # Проверка счетчика. 
+            # Если счетчик = 0, то программа добавляется в новый список
+            # В остальных случаях счетчик обнуляется
+            if ($is_exluded -eq 0){
+                $new_programs_array += $program
+            }
+            else {
+                $is_exluded = 0
+            }
+        }
+        # Возвращение нового списка
+        return $new_programs_array
+    }
+}
+
+
+$exclude_programs = @('*Update*')
+
+$compname = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object Name
+
+$program = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -AutoSize  | Exclude-Programs -ExcludeList $exclude_programs
+
+$program | Add-Member -Name 'ComputerName' -Value $compname -MemberType NoteProperty
+
+Export-Csv -InputObject $program -Path 'C:\programs.csv' -NoTypeInformation -Encoding UTF8
+
+Out-File -InputObject $excluded 'C:\programs.csv' -Encoding UTF8 -Force

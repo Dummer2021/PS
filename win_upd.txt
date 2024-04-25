@@ -1,0 +1,17 @@
+
+
+cd D:\distr\PSTools
+
+.\PsExec64.exe -s \\1*.1*.1*.1* powershell
+
+Set-ExecutionPolicy –ExecutionPolicy RemoteSigned -force     - установить параметры запуска скриптов
+
+Get-WUInstall -IgnoreUserInput -Acceptall -AutoReboot -Install    -  Verbose - обновление с перезагрузкой
+
+Get-WUInstall -IgnoreUserInput -Acceptall -Install -Verbose
+
+Get-WUSettings – получить настройки клиента Windows Update;
+
+Get-WUList - Вывести список обновлений
+
+Get-WUServiceManager  - проверить, откуда должна получать обновления ваша ОС Windows

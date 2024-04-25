@@ -1,0 +1,29 @@
+
+----------------------------------------------------
+
+(Get-ADComputer -Filter *).Name - список ПК домена 
+
+----------------------------------------------------
+
+
+Список установленных программ
+
+
+----------------------------------------------------
+
+$ComputerName = Get-WmiObject -Class Win32_ComputerSystem | Select-Object Name
+$InstallProg = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher
+
+--------------------------------------------------------------
+
+Cписок установленного ПО на удаленном компьютере в файл
+
+--------------------------------------------------------------
+
+Invoke-command -computer wks_name11 {Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -AutoSize } > c:\temp\ installed-software.txt
+
+--------------------------------------------------------------
+
+$computers = (Get-ADComputer -Filter *).Name | Invoke-command -computer $computers {Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -AutoSize } > c:\installed-software.txt
+
+
